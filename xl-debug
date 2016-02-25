@@ -77,7 +77,7 @@ fi
 [[ -z "$XEN_NAME" ]] && missing_opt -n
 
 echo "[+] Creating guest in paused mode"
-dump_cmd xl create -p -c "$XEN_CONFIG" -n "$XEN_NAME"
+dump_cmd xl create -p "$XEN_CONFIG"
 echo "[+] Getting domain ID"
 domid=$(dump_cmd xl domid "$XEN_NAME")
 echo "[+] Got domain ID: $domid"
