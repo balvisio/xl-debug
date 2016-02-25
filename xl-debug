@@ -1,0 +1,89 @@
+#!/bin/bash
+
+set -e
+
+DRYRUN=0
+
+usage() {
+    echo "usage: $0 -h"
+    echo "       $0 [-D debug_port] [-x] -f config.xen -n guest_name"
+    echo ""
+    echo "OPTIONS:"
+    echo "-D debug_port (default=9876)"
+    echo "    Run the gdbsx server on the specified port."
+    echo ""
+    echo "-f config.xen"
+    echo "    Xen config file to use for guest."
+    echo ""
+    echo "-n guest_name"
+    echo "    The guest name as specified in the config file."
+    echo ""
+    echo "-x"
+    echo "    Dry run. Don't execute commands, only print them."
+}
+
+missing_opt() {
+    echo "error: getopt: $1 is missing" >&2
+    usage >&2
+    exit 1
+}
+
+dump_cmd() {
+    echo $@ >&2
+    if [ "$DRYRUN" -ne 1 ]; then
+        $@
+    fi
+}
+
+if ! which gdbsx >/dev/null; then
+    echo "error: gdbsx: command not found" >&2
+    echo "" >&2
+    echo "Please install gdbsx (see wiki)" >&2
+    exit 1
+fi
+
+DEBUG_PORT=9876
+while getopts "D:f:n:hx" opt; do
+    case $opt in
+        D)
+            DEBUG_PORT=${OPTARG}
+            ;;
+        h)
+            HELP=1
+            ;;
+        f)
+            XEN_CONFIG=${OPTARG}
+            ;;
+        n)
+            XEN_NAME=${OPTARG}
+            ;;
+        x)
+            DRYRUN=1
+            ;;
+        \?)
+            echo "error: getopt: invalid flag: -$OPTARG" >&2
+            usage >&2
+            exit 1
+            ;;
+    esac
+done
+
+if [ -n "$HELP" ]; then
+    usage
+    exit
+fi
+
+[[ -z "$XEN_CONFIG" ]] && missing_opt -f
+[[ -z "$XEN_NAME" ]] && missing_opt -n
+
+echo "[+] Creating guest in paused mode"
+dump_cmd xl create -p -c "$XEN_CONFIG" -n "$XEN_NAME"
+echo "[+] Getting domain ID"
+domid=$(dump_cmd xl domid "$XEN_NAME")
+echo "[+] Got domain ID: $domid"
+echo "[+] Starting gdbsx on port $DEBUG_PORT"
+echo "[+] Connect gdb to this port on Xen"
+dump_cmd gdbsx -a "$domid" 64 "$DEBUG_PORT"
+
+echo "[+] Destorying guest domain"
+dump_cmd xl destroy "$domid"
