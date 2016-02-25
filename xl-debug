@@ -83,7 +83,7 @@ domid=$(dump_cmd xl domid "$XEN_NAME")
 echo "[+] Got domain ID: $domid"
 echo "[+] Starting gdbsx on port $DEBUG_PORT"
 echo "[+] Connect gdb to this port"
-dump_cmd gdbsx -a "$domid" 64 "$DEBUG_PORT"
+dump_cmd gdbsx -a "$domid" 64 "$DEBUG_PORT" -d
 
 echo "[+] Destorying guest domain"
 dump_cmd xl destroy "$domid"
