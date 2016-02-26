@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 DRYRUN=0
 
 usage() {
