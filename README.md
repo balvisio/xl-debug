@@ -19,5 +19,5 @@ sudo install -m 0755 xl-debug /usr/local/bin/xl-debug
 
 ```
 # xl-debug -h
-# xl-debug -f config.xen -n mini-os
+# xl-debug -f config.xen -n minios
 ```
