@@ -10,6 +10,8 @@ Small utility that
 
 
 ## Installation
+We assume you have [gdbsx installed](https://unigornel.org/doku.php?id=development:debugging).
+
 
 ```
 sudo install -m 0755 xl-debug /usr/local/bin/xl-debug
